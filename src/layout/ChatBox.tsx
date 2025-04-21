@@ -1,96 +1,141 @@
-import { Box, Container, OutlinedInput, Typography } from "@mui/material";
-import { GoogleGenAI } from "@google/genai";
 import { useState } from "react";
+import { Box, IconButton, InputBase, Typography } from "@mui/material";
+import { useDispatch, useSelector } from "react-redux";
 import ChatBoxTopBar from "./ChatBoxTopBar";
-
-type Message = {
-    sender: string;
-    message: string;
-    timestamp: Date
-}
+import { generateChatroomTitle, promptMessage } from "../features/chatrooms/chatroomActions";
+import { getChatMessages, selectChatContext } from "../features/chatrooms/chatroomSelectors";
+import { useNavigate, useParams } from "react-router-dom";
+import { ContentType } from "../types/chatroomsTypes";
+import { db } from "../firebase";
+import { doc, collection } from "firebase/firestore"
+import { AppDispatch } from "../store";
+import MessageBubble from "./MessageBubble";
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 
 function ChatBox() {
-    const [output, setOutput] = useState<Message[]>([]);
+    const dispatch = useDispatch<AppDispatch>();
+    const navigate = useNavigate();
+    const routePath = useParams()?.chatroomId
+
+    const chatContext = useSelector(selectChatContext(routePath));
+    const allMessages = useSelector(getChatMessages(routePath))
+    console.log(allMessages)
     const [input, setInput] = useState<string>("");
 
-    const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GENAI_API_KEY });
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
 
-    async function main() {
+        let content: ContentType = input;
+        let chatroomId = doc(collection(db, 'chatrooms')).id;
 
-        const response = await ai.models.generateContent({
-            model: "gemini-2.0-flash",
-            contents: input,
-        });
-        setOutput((prev): Message[] => [{ sendar: 'ai', message: response.text, timestamp: new Date() }, ...prev]);
+        if (routePath) {
+            content = [...chatContext, { role: "user", parts: [{ text: input }] }]
+            chatroomId = routePath
+        }
+
+        dispatch(promptMessage({ content, chatroomId, prompt: input }))
+        if (!routePath) {
+            dispatch(generateChatroomTitle({ prompt: input, chatroomId }))
+            navigate(`/chat/${chatroomId}`)
+        }
+        setInput('');
     }
 
     return (
         <Box
             sx={{
+                display: 'flex',
+                flexDirection: 'column',
                 width: '100%',
+                height: '100vh',
+                m: 0,
+                p: 0
             }}
         >
             <ChatBoxTopBar />
-            <Container
+            <Box
+                className="chat-box"
                 sx={{
                     display: 'flex',
-                    flexDirection: 'column-reverse',
-                    height: '100%',
-                    px: 10,
-                    justifyContent: output.length > 0 ? "start" : "center",
+                    flexDirection: 'column',
+                    height: 'calc(100vh - 60px)',
+                    width: '100%',
+                    m: 0,
+                    justifyContent: allMessages.length > 0 ? "end" : "center",
                     alignItems: 'center',
-                    overflowY: 'auto',
                 }}
             >
                 <Box
                     sx={{
-                        width: '700px',
+                        overflowY: 'auto',
+                        width: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
                     }}
                 >
-                    <Typography variant="h4" gutterBottom>
-                        What can I help you with?
-                    </Typography>
-                    <OutlinedInput
-                        placeholder="Ask anything"
-                        value={input}
-                        onChange={e => setInput(e.target.value)}
-                        sx={{
-                            borderRadius: '20px',
-                            padding: '10px 15px',
-                            border: '0px',
-                            marginTop: 'auto',
-                        }}
-                        fullWidth
-                        multiline
-                        maxRows={4}
-                    />
-                    <Container sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-                        <button
-                            style={{
-                                padding: '10px 20px',
-                                borderRadius: '20px',
-                                border: 'none',
-                                backgroundColor: '#1976d2',
-                                color: '#fff',
-                                cursor: 'pointer',
-                            }}
-                            onClick={async () => {
-                                await main();
-                                setInput("");
-                            }}
-                        >
-                            Send
-                        </button>
-                    </Container>
+                    <Box sx={{ width: '60%', display: 'flex', flexDirection: 'column', maxWidth: '700px' }}>
+                        {allMessages.length > 0 && (allMessages.map((msg, index) => (
+                            <MessageBubble
+                                key={index}
+                                msg={msg}
+                            />)))
+                        }
+                    </Box>
                 </Box>
-                {output.length > 0 && (
-                    output.map((msg, index) => (
-                        <Container key={index} sx={{ mt: 2, p: 2, borderRadius: '10px', backgroundColor: '#f0f0f0' }}>
-                            <Typography variant="body1">{msg.message}</Typography>
-                        </Container>
-                    )
-                    ))}
-            </Container>
+                <Box sx={{
+                    justifySelf: 'flex-end',
+                    width: '70%',
+                    maxWidth: '700px',
+                }}>
+                    {allMessages.length === 0 &&
+                        <Typography variant="h4" gutterBottom>
+                            What can I help you with?
+                        </Typography>
+                    }
+                    <Box
+                        sx={{
+                            backgroundColor: '#f1f1f1',
+                            borderRadius: '30px',
+                            pl: 2,
+                            pr: 1,
+                            py: 1,
+                        }}
+                        component="form"
+                    >
+                        <InputBase
+                            placeholder="Ask anything"
+                            value={input}
+                            onChange={e => setInput(e.target.value)}
+                            sx={{
+                                px: 1.5,
+                                pt: 1,
+                                border: '0px',
+                            }}
+                            fullWidth
+                            multiline
+                            maxRows={6}
+                        />
+                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1, pr: 0.5, pb: 0.5 }}>
+                            <IconButton
+                                style={{
+                                    borderRadius: '20px',
+                                    border: 'none',
+                                    backgroundColor: '#1976d2',
+                                    color: '#fff',
+                                    cursor: 'pointer',
+                                    width: '35px',
+                                    height: '35px',
+                                }}
+                                onClick={handleSubmit}
+                                disabled={input.trim() === ""}
+                            >
+                                <ArrowUpwardIcon />
+                            </IconButton>
+                        </Box>
+                    </Box>
+                </Box>
+            </Box>
         </Box>
     );
 }

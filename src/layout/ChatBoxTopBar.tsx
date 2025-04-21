@@ -7,11 +7,10 @@ function ChatBoxTopBar() {
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                position: 'fixed',
-                width: '100%',
+                height: '60px',
                 px: 3,
                 py: 1,
-                borderBottom: '1px black solid',
+                backgroundColor: '#f1f1f1',
             }}
         >
             <Typography>ChadGBD</Typography>
