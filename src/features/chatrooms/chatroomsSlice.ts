@@ -19,7 +19,7 @@ const chatroomSlice = createSlice({
                 if (!state.chatrooms[chatroomId]) {
                     state.chatrooms[chatroomId] = {
                         id: chatroomId,
-                        title: "",
+                        title: "New Chat",
                         lastModified: new Date(),
                         loading: false,
                         messages: [],
@@ -34,14 +34,16 @@ const chatroomSlice = createSlice({
             })
             .addCase(promptMessage.fulfilled, (state, action) => {
                 const { chatroomId, response } = action.payload;
+                const modifiedDate = new Date();
                 state.chatrooms[chatroomId].loading = false;
                 if (response) {
                     state.chatrooms[chatroomId].messages.push({
                         role: "model",
                         message: response,
-                        timestamp: new Date()
+                        timestamp: modifiedDate
                     });
                 }
+                state.chatrooms[chatroomId].lastModified = modifiedDate;
             })
             .addCase(promptMessage.rejected, (state, action) => {
                 const { chatroomId } = action.meta.arg;

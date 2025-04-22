@@ -10,7 +10,7 @@ export default function MessageBubble({ msg }: { msg: MessageStateType }) {
             px: 2,
             width: role === 'user' ? '70%' : '100%',
             alignSelf: role === "user" ? 'flex-end' : 'flex-start',
-            backgroundColor: role === 'user' ? '#f1f1f1' : 'none',
+            backgroundColor: role === 'user' ? '#f4f4f4' : 'none',
             borderRadius: '15px',
         }}>
             <Typography variant="body1">

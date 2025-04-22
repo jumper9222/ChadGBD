@@ -7,21 +7,23 @@ function ChatBoxTopBar() {
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                height: '60px',
+                height: '40px',
                 px: 3,
                 py: 1,
-                backgroundColor: '#f1f1f1',
+                backgroundColor: '#fff',
+                borderBottom: '1.5px solid rgb(234, 234, 234)'
             }}
         >
-            <Typography>ChadGBD</Typography>
+            <Typography sx={{ fontWeight: 'bold', fontSize: '18px', color: '#5d5d5d' }}>ChadGBD</Typography>
             <Box
                 sx={{
                     display: "flex",
+                    alignItems: 'center',
                     gap: 2
                 }}
             >
                 <Button>Temporary</Button>
-                <Avatar />
+                <Avatar sx={{ width: '32px', height: '32px' }} />
             </Box>
         </Box>
     )

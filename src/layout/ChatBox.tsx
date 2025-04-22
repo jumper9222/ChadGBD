@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Box, IconButton, InputBase, Typography } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import ChatBoxTopBar from "./ChatBoxTopBar";
@@ -22,11 +22,18 @@ function ChatBox() {
     console.log(allMessages)
     const [input, setInput] = useState<string>("");
 
+    const bottomRef = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, []);
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
         let content: ContentType = input;
         let chatroomId = doc(collection(db, 'chatrooms')).id;
+
 
         if (routePath) {
             content = [...chatContext, { role: "user", parts: [{ text: input }] }]
@@ -74,7 +81,7 @@ function ChatBox() {
                         alignItems: 'center',
                     }}
                 >
-                    <Box sx={{ width: '60%', display: 'flex', flexDirection: 'column', maxWidth: '700px' }}>
+                    <Box sx={{ width: '60%', display: 'flex', flexDirection: 'column', maxWidth: '700px', pt: 2 }}>
                         {allMessages.length > 0 && (allMessages.map((msg, index) => (
                             <MessageBubble
                                 key={index}
@@ -84,6 +91,7 @@ function ChatBox() {
                     </Box>
                 </Box>
                 <Box sx={{
+
                     justifySelf: 'flex-end',
                     width: '70%',
                     maxWidth: '700px',
@@ -93,48 +101,52 @@ function ChatBox() {
                             What can I help you with?
                         </Typography>
                     }
-                    <Box
+                    <div ref={bottomRef} />
+                </Box>
+                <Box
+                    sx={{
+                        backgroundColor: '#f4f4f4',
+                        borderRadius: '30px',
+                        width: '70%',
+                        maxWidth: '700px',
+                        pl: 2,
+                        pr: 1,
+                        py: 1,
+                    }}
+                    component="form"
+                >
+                    <InputBase
+                        placeholder="Ask anything"
+                        value={input}
+                        onChange={e => setInput(e.target.value)}
                         sx={{
-                            backgroundColor: '#f1f1f1',
-                            borderRadius: '30px',
-                            pl: 2,
-                            pr: 1,
-                            py: 1,
+                            px: 1.5,
+                            pt: 1,
+                            border: '0px',
                         }}
-                        component="form"
-                    >
-                        <InputBase
-                            placeholder="Ask anything"
-                            value={input}
-                            onChange={e => setInput(e.target.value)}
-                            sx={{
-                                px: 1.5,
-                                pt: 1,
-                                border: '0px',
+                        fullWidth
+                        multiline
+                        maxRows={6}
+                    />
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1, pr: 0.5, pb: 0.5 }}>
+                        <IconButton
+                            style={{
+                                borderRadius: '20px',
+                                border: 'none',
+                                backgroundColor: '#1976d2',
+                                color: '#fff',
+                                cursor: 'pointer',
+                                width: '35px',
+                                height: '35px',
                             }}
-                            fullWidth
-                            multiline
-                            maxRows={6}
-                        />
-                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1, pr: 0.5, pb: 0.5 }}>
-                            <IconButton
-                                style={{
-                                    borderRadius: '20px',
-                                    border: 'none',
-                                    backgroundColor: '#1976d2',
-                                    color: '#fff',
-                                    cursor: 'pointer',
-                                    width: '35px',
-                                    height: '35px',
-                                }}
-                                onClick={handleSubmit}
-                                disabled={input.trim() === ""}
-                            >
-                                <ArrowUpwardIcon />
-                            </IconButton>
-                        </Box>
+                            onClick={handleSubmit}
+                            disabled={input.trim() === ""}
+                        >
+                            <ArrowUpwardIcon />
+                        </IconButton>
                     </Box>
                 </Box>
+                <Typography variant="caption" sx={{ py: 0.75 }}>ChadGBD can make mistakes. Check important info.</Typography>
             </Box>
         </Box>
     );

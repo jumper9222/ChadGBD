@@ -21,8 +21,9 @@ export interface GenerateChatroomTitleType {
     chatroomId: string;
 }
 export interface ChatroomTitleType {
-    title: string | undefined;
+    title: string;
     chatroomId: string;
+    lastModified?: Date
 }
 
 // This interface is used to define the structure of a chatroom object in the Redux store.
@@ -35,9 +36,16 @@ export interface MessageStateType {
 // This interface is used to define the structure of a chatroom object in the Redux store.
 export interface ChatroomStateType {
     id: string;
-    title: string | null;
+    title: string;
     lastModified: Date;
     loading: boolean;
     messages: MessageStateType[];
+}
+
+export interface GroupedChatrooms {
+    today: ChatroomTitleType[];
+    yesterday: ChatroomTitleType[];
+    prev7Days: ChatroomTitleType[];
+    prev30Days: ChatroomTitleType[];
 }
 
