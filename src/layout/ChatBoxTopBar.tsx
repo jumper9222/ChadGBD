@@ -1,12 +1,36 @@
-import { Avatar, Box, Button, Typography } from "@mui/material";
+import { Avatar, Box, Button, ClickAwayListener, Divider, IconButton, Menu, MenuItem, MenuList, Typography } from "@mui/material";
+import { useContext, useState } from "react";
+import { AuthContext } from "../features/auth/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { handleLogout } from "../features/auth/AuthActions";
+import { useDispatch } from "react-redux";
+import { clearChatrooms } from "../features/chatrooms/chatroomsSlice";
 
 function ChatBoxTopBar() {
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const { user } = useContext(AuthContext);
+
+    console.log(user)
+
+    const [openUserMenu, setOpenUserMenu] = useState<null | HTMLElement>(null)
+    const open = Boolean(openUserMenu)
+
+    const toggleOpenUserMenu = (e: React.MouseEvent<HTMLButtonElement>) => {
+        setOpenUserMenu(e.currentTarget)
+    }
+
+    const handleClose = () => {
+        setOpenUserMenu(null)
+    }
+
     return (
         <Box
             sx={{
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
+                flex: 1,
                 height: '40px',
                 px: 3,
                 py: 1,
@@ -22,8 +46,35 @@ function ChatBoxTopBar() {
                     gap: 2
                 }}
             >
-                <Button>Temporary</Button>
-                <Avatar sx={{ width: '32px', height: '32px' }} />
+                {user
+                    ? <>
+                        <Button>Temporary</Button>
+                        <IconButton onClick={toggleOpenUserMenu}>
+                            <Avatar sx={{ width: '32px', height: '32px' }} src={user.photoURL} />
+                        </IconButton>
+                        <Menu open={open} anchorEl={openUserMenu} onClose={handleClose}>
+                            <ClickAwayListener onClickAway={handleClose}>
+                                <MenuList>
+                                    <MenuItem>Explore GBDs</MenuItem>
+                                    <MenuItem>Customize ChadGBD</MenuItem>
+                                    <MenuItem>Help & FAQ</MenuItem>
+                                    <MenuItem>Settings</MenuItem>
+                                    <Divider />
+                                    <MenuItem>Get ChatGBD search extension</MenuItem>
+                                    <Divider />
+                                    <MenuItem onClick={() => handleLogout()
+                                        .then(() => navigate('/'))
+                                        .then(() => dispatch(clearChatrooms()))
+                                    }>Log out</MenuItem>
+                                </MenuList>
+                            </ClickAwayListener>
+                        </Menu>
+                    </>
+                    : <>
+                        <Button onClick={() => navigate('/login')}>Login</Button>
+                        <Button onClick={() => navigate('/signup')}>Signup</Button>
+                    </>
+                }
             </Box>
         </Box>
     )

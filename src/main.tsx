@@ -5,12 +5,15 @@ import App from './App.tsx'
 import { PersistGate } from 'redux-persist/integration/react'
 import { Provider } from 'react-redux'
 import store, { persistor } from './store.ts'
+import AuthProvider from './features/auth/AuthContextProvider.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-        <App />
+        <AuthProvider>
+          <App />
+        </AuthProvider>
       </PersistGate>
     </Provider>
   </StrictMode>,

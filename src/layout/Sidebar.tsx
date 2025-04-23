@@ -1,6 +1,6 @@
 import { Box, IconButton, List, ListItemButton, ListSubheader, Typography } from "@mui/material";
 import { useSelector } from "react-redux";
-import { Outlet, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { getChatroomTitles } from "../features/chatrooms/chatroomSelectors";
 import { ChatroomTitleType } from "../types/chatroomsTypes";
 import React from "react";
@@ -15,34 +15,24 @@ function Sidebar() {
         <Box
             sx={{
                 display: "flex",
-                flexDirection: "row",
-                height: "100%",
-                width: "100%",
+                width: "270px",
+                flexDirection: "column",
+                backgroundColor: "#f9f9f9",
+                paddingLeft: 1.5
             }}
         >
-            <Box
-                sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    width: "270px",
-                    backgroundColor: "#f9f9f9",
-                    paddingLeft: 1.5
-                }}
-            >
-                <SidebarButtons />
-                <List>
-                    {Object.entries(groupedChatrooms).map(([period, chatrooms], index) => (
-                        chatrooms.length > 0 &&
-                        <React.Fragment key={index}>
-                            <ListSubheader sx={{ pl: 1, py: 0, m: 0, background: 'none' }}>{period}</ListSubheader>
-                            {chatrooms.map((chatroom: ChatroomTitleType) => (
-                                <ChatroomTitle title={chatroom.title} id={chatroom.chatroomId} key={chatroom.chatroomId} />
-                            ))}
-                        </React.Fragment>
-                    ))}
-                </List>
-            </Box>
-            <Outlet />
+            <SidebarButtons />
+            <List>
+                {Object.entries(groupedChatrooms).map(([period, chatrooms], index) => (
+                    chatrooms.length > 0 &&
+                    <React.Fragment key={index}>
+                        <ListSubheader sx={{ pl: 1, py: 0, m: 0, background: 'none' }}>{period}</ListSubheader>
+                        {chatrooms.map((chatroom: ChatroomTitleType) => (
+                            <ChatroomTitle title={chatroom.title} id={chatroom.chatroomId} key={chatroom.chatroomId} />
+                        ))}
+                    </React.Fragment>
+                ))}
+            </List>
         </Box>
     )
 }
@@ -63,7 +53,7 @@ function SidebarButtons() {
             <IconButton><MenuIcon /></IconButton>
             <Box sx={{ display: 'flex', }}>
                 <IconButton><SearchIcon /></IconButton>
-                <IconButton onClick={() => navigate('/chat')}><EditSquareIcon /></IconButton>
+                <IconButton onClick={() => navigate('/')}><EditSquareIcon /></IconButton>
             </Box>
         </Box>
     )

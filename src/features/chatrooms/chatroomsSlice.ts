@@ -11,7 +11,11 @@ const initialState = {
 const chatroomSlice = createSlice({
     name: "chatrooms",
     initialState: initialState,
-    reducers: {},
+    reducers: {
+        clearChatrooms() {
+            return initialState
+        }
+    },
     extraReducers: (builder) => {
         builder
             .addCase(promptMessage.pending, (state, action) => {
@@ -58,4 +62,5 @@ const chatroomSlice = createSlice({
     }
 })
 
+export const { clearChatrooms } = chatroomSlice.actions;
 export default chatroomSlice.reducer;

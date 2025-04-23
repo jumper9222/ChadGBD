@@ -1,14 +1,18 @@
-import ChatBox from "./layout/ChatBox";
-import Sidebar from "./layout/Sidebar";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import AuthPage from "./pages/AuthPage";
+import ChatPage from "./pages/ChatPage";
 
 function App() {
     return (
         <BrowserRouter>
             <Routes>
-                <Route path="/chat" element={<Sidebar />} >
-                    <Route path="/chat" element={<ChatBox />} />
-                    <Route path="/chat/:chatroomId" element={<ChatBox />} />
+                <Route path="/" element={<ChatPage />} />
+                <Route path="/chat/:chatroomId" element={<ChatPage />} />
+                <Route path="/login" element={<AuthPage />} >
+                    <Route path="/login/password" element={<AuthPage />} />
+                </Route>
+                <Route path="/signup" element={<AuthPage />} >
+                    <Route path="/signup/password" element={<AuthPage />} />
                 </Route>
             </Routes>
         </BrowserRouter>

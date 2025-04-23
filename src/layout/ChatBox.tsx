@@ -53,7 +53,7 @@ function ChatBox() {
             sx={{
                 display: 'flex',
                 flexDirection: 'column',
-                width: '100%',
+                flex: 1,
                 height: '100vh',
                 m: 0,
                 p: 0
@@ -119,11 +119,7 @@ function ChatBox() {
                         placeholder="Ask anything"
                         value={input}
                         onChange={e => setInput(e.target.value)}
-                        sx={{
-                            px: 1.5,
-                            pt: 1,
-                            border: '0px',
-                        }}
+                        sx={{ px: 1.5, pt: 1, border: '0px', }}
                         fullWidth
                         multiline
                         maxRows={6}
@@ -148,7 +144,7 @@ function ChatBox() {
                 </Box>
                 <Typography variant="caption" sx={{ py: 0.75 }}>ChadGBD can make mistakes. Check important info.</Typography>
             </Box>
-        </Box>
+        </Box >
     );
 }
 
