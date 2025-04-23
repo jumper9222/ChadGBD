@@ -1,50 +1,96 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { Box, IconButton, InputBase, Typography } from "@mui/material";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import ChatBoxTopBar from "./ChatBoxTopBar";
-import { generateChatroomTitle, promptMessage } from "../features/chatrooms/chatroomActions";
-import { getChatMessages, selectChatContext } from "../features/chatrooms/chatroomSelectors";
+import { createChatroomInDb, generateChatroomTitle, promptMessage } from "../features/chatrooms/chatroomActions";
 import { useNavigate, useParams } from "react-router-dom";
-import { ContentType } from "../types/chatroomsTypes";
+import { ChatHistoryType, ChatroomTitleType, ContentType, MessageStateType } from "../types/chatroomsTypes";
 import { db } from "../firebase";
-import { doc, collection } from "firebase/firestore"
+import { doc, collection, query, orderBy, onSnapshot } from "firebase/firestore"
 import { AppDispatch } from "../store";
 import MessageBubble from "./MessageBubble";
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import { AuthContext } from "../features/auth/AuthContext";
+import { getLoadingState, updateChatContext } from "../features/chatrooms/chatroomSelectors";
+import { useSelector } from "react-redux";
 
 function ChatBox() {
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
     const routePath = useParams()?.chatroomId
+    const user = useContext(AuthContext)?.user;
+    const loading = useSelector(getLoadingState(routePath as string))
 
-    const chatContext = useSelector(selectChatContext(routePath));
-    const allMessages = useSelector(getChatMessages(routePath))
-    console.log(allMessages)
     const [input, setInput] = useState<string>("");
+    const [messages, setMessages] = useState<MessageStateType[]>([]);
+    const [chatContext, setChatContext] = useState<ChatHistoryType[]>([]);
 
     const bottomRef = useRef<HTMLDivElement | null>(null);
 
+    //FIX side effect should auto scroll to bottom of chats
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, []);
+    }, [messages]);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    //ENER: Firestore ener for chatroom messages
+    useEffect(() => {
+        const messageRef = collection(db, `chatrooms/${routePath}`, 'messages')
+        const q = query(messageRef, orderBy("timestamp"))
+
+        const unsubscribe = onSnapshot(q, (querySnapshot) => {
+            const messages: MessageStateType[] = [];
+
+            querySnapshot.forEach((doc) => {
+                console.log(doc)
+                messages.push({ ...doc.data() } as MessageStateType)
+            })
+
+            setMessages(messages);
+            console.log('message: ', messages)
+        })
+        return () => unsubscribe()
+    }, [routePath])
+
+    //SIDE EFFECT: Update chat context as new messages are added
+    useEffect(() => {
+        const newChatContext = updateChatContext(messages)
+        setChatContext(newChatContext)
+    }, [messages])
+
+    //Handle submit
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         let content: ContentType = input;
         let chatroomId = doc(collection(db, 'chatrooms')).id;
 
+        //NEW CHATROOM: After prompting message, generate a title using initial prompt
+        if (!routePath) {
+            dispatch(generateChatroomTitle({ prompt: input, chatroomId }))
+                .then((action) => { //After generating the title, upload to database
+                    console.log('chatroom title generated successfully')
+                    const { title, chatroomId } = action.payload as ChatroomTitleType;
+                    if (user) {
+                        console.log('uploading chatroom to db')
+                        const chatroomData = { chatroomId, title, uid: user?.uid }
+                        createChatroomInDb(chatroomData)
+                    }
+                })
+            navigate(`/chat/${chatroomId}`)
+        }
 
+        //EXISTING CHATROOM: Update content to array of chat history and set chatroomId to current chatroom id
         if (routePath) {
             content = [...chatContext, { role: "user", parts: [{ text: input }] }]
             chatroomId = routePath
         }
 
+        //Prompt message using model (either string or array)
         dispatch(promptMessage({ content, chatroomId, prompt: input }))
-        if (!routePath) {
-            dispatch(generateChatroomTitle({ prompt: input, chatroomId }))
-            navigate(`/chat/${chatroomId}`)
-        }
+            .then(() => {
+                console.log('message prompted successfully', content, chatroomId, input)
+            })
+
         setInput('');
     }
 
@@ -68,7 +114,7 @@ function ChatBox() {
                     height: 'calc(100vh - 60px)',
                     width: '100%',
                     m: 0,
-                    justifyContent: allMessages.length > 0 ? "end" : "center",
+                    justifyContent: messages.length > 0 ? "end" : "center",
                     alignItems: 'center',
                 }}
             >
@@ -82,12 +128,26 @@ function ChatBox() {
                     }}
                 >
                     <Box sx={{ width: '60%', display: 'flex', flexDirection: 'column', maxWidth: '700px', pt: 2 }}>
-                        {allMessages.length > 0 && (allMessages.map((msg, index) => (
+                        {messages.length > 0 && (messages.map((msg, index) => (
                             <MessageBubble
                                 key={index}
                                 msg={msg}
                             />)))
                         }
+                        {loading && <Typography sx={{
+                            mb: 2,
+                            background: 'linear-gradient(90deg, #ccc 25%, #e0e0e0 50%, #ccc 75%)',
+                            backgroundSize: '200% 100%',
+                            animation: 'shimmer 1.5s infinite',
+                            color: 'transparent',
+                            backgroundClip: 'text',
+                            WebkitBackgroundClip: 'text',
+                            '@keyframes shimmer': {
+                                '0%': { backgroundPosition: '-200% 0' },
+                                '100%': { backgroundPosition: '200% 0' },
+                            }
+                        }}>Generating response</Typography>}
+                        <div ref={bottomRef} />
                     </Box>
                 </Box>
                 <Box sx={{
@@ -96,12 +156,11 @@ function ChatBox() {
                     width: '70%',
                     maxWidth: '700px',
                 }}>
-                    {allMessages.length === 0 &&
+                    {messages.length === 0 &&
                         <Typography variant="h4" gutterBottom>
                             What can I help you with?
                         </Typography>
                     }
-                    <div ref={bottomRef} />
                 </Box>
                 <Box
                     sx={{
@@ -114,6 +173,7 @@ function ChatBox() {
                         py: 1,
                     }}
                     component="form"
+                    onSubmit={handleSubmit}
                 >
                     <InputBase
                         placeholder="Ask anything"
@@ -135,8 +195,8 @@ function ChatBox() {
                                 width: '35px',
                                 height: '35px',
                             }}
-                            onClick={handleSubmit}
                             disabled={input.trim() === ""}
+                            type="submit"
                         >
                             <ArrowUpwardIcon />
                         </IconButton>

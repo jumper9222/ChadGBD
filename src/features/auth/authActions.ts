@@ -1,7 +1,10 @@
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, UserInfo } from "firebase/auth"
 import { auth, db, provider } from "../../firebase"
 import { doc, getDoc, setDoc } from "firebase/firestore"
-import { persistor } from "../../store"
+import { persistStore } from "redux-persist";
+import store from "../../store";
+const persistor = persistStore(store);
+
 
 export const loginWithEmailAndPassword = async (email: string, password: string) => {
     await signInWithEmailAndPassword(auth, email, password)
@@ -26,6 +29,7 @@ export const signupWithEmailAndPassword = async (email: string, password: string
         .catch((error) => console.log('Failed to register user: ', error.message))
 }
 
+//Login using google account
 export const loginWithGoogle = async () => {
     signInWithPopup(auth, provider)
         .then((user) => {
@@ -35,5 +39,5 @@ export const loginWithGoogle = async () => {
 
 export const handleLogout = async () => {
     auth.signOut()
-        .then(() => { persistor.purge() })
+        .then(() => persistor.purge()) //Purge persist state when logging out
 }

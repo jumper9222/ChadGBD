@@ -28,7 +28,7 @@ function Sidebar() {
                     <React.Fragment key={index}>
                         <ListSubheader sx={{ pl: 1, py: 0, m: 0, background: 'none' }}>{period}</ListSubheader>
                         {chatrooms.map((chatroom: ChatroomTitleType) => (
-                            <ChatroomTitle title={chatroom.title} id={chatroom.chatroomId} key={chatroom.chatroomId} />
+                            <ChatroomTitle title={chatroom.title || 'New Chat'} id={chatroom.chatroomId} key={chatroom.chatroomId} />
                         ))}
                     </React.Fragment>
                 ))}
@@ -40,7 +40,11 @@ function Sidebar() {
 function ChatroomTitle({ title, id }: { title: string, id: string }) {
     const navigate = useNavigate();
     return (
-        <ListItemButton onClick={() => navigate(`/chat/${id}`)} sx={{ borderRadius: '10px', p: 1, py: 0.75, mr: 1.75, overflow: 'hidden' }}>
+        <ListItemButton onClick={() => navigate(`/chat/${id}`)} sx={{
+            borderRadius: '10px', p: 1, py: 0.75, mr: 1.75, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            WebkitMaskImage: 'linear-gradient(to right, black 80%, transparent)',
+            maskImage: 'linear-gradient(to right, black 80%, transparent)',
+        }}>
             <Typography variant="body2" sx={{ textWrap: 'nowrap' }}>{title}</Typography>
         </ListItemButton>
     )

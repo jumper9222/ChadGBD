@@ -11,8 +11,6 @@ function ChatBoxTopBar() {
     const dispatch = useDispatch();
     const { user } = useContext(AuthContext);
 
-    console.log(user)
-
     const [openUserMenu, setOpenUserMenu] = useState<null | HTMLElement>(null)
     const open = Boolean(openUserMenu)
 
@@ -50,7 +48,7 @@ function ChatBoxTopBar() {
                     ? <>
                         <Button>Temporary</Button>
                         <IconButton onClick={toggleOpenUserMenu}>
-                            <Avatar sx={{ width: '32px', height: '32px' }} src={user.photoURL} />
+                            <Avatar sx={{ width: '32px', height: '32px' }} src={user.photoURL as string} />
                         </IconButton>
                         <Menu open={open} anchorEl={openUserMenu} onClose={handleClose}>
                             <ClickAwayListener onClickAway={handleClose}>

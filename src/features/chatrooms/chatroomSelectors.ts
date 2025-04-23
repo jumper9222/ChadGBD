@@ -4,6 +4,7 @@ import { RootState } from "../../store";
 
 const getChatrooms = (state: RootState) => state.chatrooms.chatrooms;
 
+//SELECT CHAT CONTEXT from redux store if relying on redux store for state management
 export const selectChatContext = (chatroomId: string | undefined) => createSelector( //select's chat history of last 10 messages
     [getChatrooms],
     (chatrooms): ChatHistoryType[] => {
@@ -14,6 +15,16 @@ export const selectChatContext = (chatroomId: string | undefined) => createSelec
         })
     });
 
+//UPDATE CHAT CONTEXT from react state, for when using firestore listener 
+export const updateChatContext = (messages: MessageStateType[]) => {
+    const chatContext = messages.slice(-9).map((messageItem) => {
+        const { role, message } = messageItem;
+        return { role, parts: [{ text: message }] };
+    })
+    return chatContext
+}
+
+//GET CHAT MESSAGES from redux store
 export const getChatMessages = (chatroomId: string | undefined) => createSelector(
     [getChatrooms],
     (chatrooms) => {
@@ -22,6 +33,7 @@ export const getChatMessages = (chatroomId: string | undefined) => createSelecto
     }
 )
 
+//GET CHATROOM TITLES from redux store
 export const getChatroomTitles = () => createSelector(
     [getChatrooms],
     (chatrooms) => {
@@ -54,5 +66,12 @@ export const getChatroomTitles = () => createSelector(
 
                 return accu
             }, { today: [], yesterday: [], prev7Days: [], prev30Days: [] })
+    }
+)
+
+export const getLoadingState = (id: string) => createSelector(
+    [getChatrooms],
+    (chatrooms) => {
+        return chatrooms[id]?.loading
     }
 )
