@@ -9,7 +9,8 @@ const {
     VITE_FIREBASE_STORAGE_BUCKET,
     VITE_FIREBASE_MESSAGING_SENDER_ID,
     VITE_FIREBASE_APP_ID,
-    VITE_FILEBASE_MEASUREMENT_ID
+    VITE_FILEBASE_MEASUREMENT_ID,
+    VITE_FIREBSE_DATABASE_URL
 } = import.meta.env;
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -19,6 +20,7 @@ const {
 const firebaseConfig = {
     apiKey: VITE_FIREBASE_API_KEY,
     authDomain: VITE_FIREBASE_AUTH_DOMAIN,
+    databaseURL: VITE_FIREBSE_DATABASE_URL,
     projectId: VITE_FIREBASE_PROJECT_ID,
     storageBucket: VITE_FIREBASE_STORAGE_BUCKET,
     messagingSenderId: VITE_FIREBASE_MESSAGING_SENDER_ID,

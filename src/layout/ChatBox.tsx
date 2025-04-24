@@ -27,7 +27,6 @@ function ChatBox() {
 
     const bottomRef = useRef<HTMLDivElement | null>(null);
 
-    //FIX side effect should auto scroll to bottom of chats
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);

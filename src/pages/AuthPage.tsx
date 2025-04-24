@@ -4,14 +4,14 @@ import GoogleIcon from '@mui/icons-material/Google';
 import MicrosoftIcon from '@mui/icons-material/Microsoft';
 import AppleIcon from '@mui/icons-material/Apple';
 import { useContext, useState } from "react";
-import { loginWithEmailAndPassword, loginWithGoogle, signupWithEmailAndPassword } from "../features/auth/AuthActions";
+import { loginWithEmailAndPassword, loginWithGoogle, signupWithEmailAndPassword } from "../features/auth/authActions";
 import { AuthContext } from "../features/auth/AuthContext";
 
 export default function AuthPage() {
     const route = useLocation().pathname;
     const navigate = useNavigate();
-    console.log(route)
-    const { user } = useContext(AuthContext)
+    console.log(route);
+    const { user } = useContext(AuthContext);
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
 

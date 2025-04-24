@@ -2,7 +2,7 @@ import { Avatar, Box, Button, ClickAwayListener, Divider, IconButton, Menu, Menu
 import { useContext, useState } from "react";
 import { AuthContext } from "../features/auth/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { handleLogout } from "../features/auth/AuthActions";
+import { handleLogout } from "../features/auth/authActions";
 import { useDispatch } from "react-redux";
 import { clearChatrooms } from "../features/chatrooms/chatroomsSlice";
 
