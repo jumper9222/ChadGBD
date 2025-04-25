@@ -21,15 +21,7 @@ const chatroomSlice = createSlice({
             //PROMPT MESSAGE extra reducers
             .addCase(promptMessage.pending, (state, action) => {
                 const { prompt, chatroomId } = action.meta.arg;
-                if (!state.chatrooms[chatroomId]) {
-                    state.chatrooms[chatroomId] = {
-                        id: chatroomId,
-                        title: "New Chat",
-                        lastModified: new Date(),
-                        loading: false,
-                        messages: [],
-                    };
-                }
+
                 const userPrompt: MessageStateType = {
                     role: "user",
                     message: prompt,
@@ -60,11 +52,25 @@ const chatroomSlice = createSlice({
                 state.chatrooms[chatroomId].loading = false;
             })
             //GENERATE CHATROOM TITLE extra reducers
+            .addCase(generateChatroomTitle.pending, (state, action) => {
+                const { chatroomId } = action.meta.arg;
+                state.chatrooms[chatroomId] = {
+                    id: chatroomId,
+                    title: "New chat",
+                    lastModified: new Date(),
+                    loading: true,
+                    messages: [],
+                }
+            })
             .addCase(generateChatroomTitle.fulfilled, (state, action) => {
                 const { chatroomId, title } = action.payload;
-                if (title) {
-                    state.chatrooms[chatroomId].title = title;
-                }
+                state.chatrooms[chatroomId].title = title;
+                state.chatrooms[chatroomId].loading = false;
+            })
+            .addCase(generateChatroomTitle.rejected, (state, action) => {
+                const { chatroomId } = action.meta.arg;
+                console.error('there was an issue generating the chatroom title')
+                state.chatrooms[chatroomId].loading = false;
             })
             //FETCH CHATROOMS extra reducers
             .addCase(fetchChatroomsByUserId.fulfilled, (state, action) => {

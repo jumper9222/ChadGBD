@@ -61,7 +61,7 @@ function ChatBoxTopBar() {
                                     <MenuItem>Get ChatGBD search extension</MenuItem>
                                     <Divider />
                                     <MenuItem onClick={() => handleLogout()
-                                        .then(() => navigate('/'))
+                                        .then(() => navigate('/login'))
                                         .then(() => dispatch(clearChatrooms()))
                                     }>Log out</MenuItem>
                                 </MenuList>

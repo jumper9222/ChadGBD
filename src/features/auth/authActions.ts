@@ -5,7 +5,6 @@ import { persistStore } from "redux-persist";
 import store from "../../store";
 const persistor = persistStore(store);
 
-
 export const loginWithEmailAndPassword = async (email: string, password: string) => {
     await signInWithEmailAndPassword(auth, email, password)
 }
@@ -39,5 +38,7 @@ export const loginWithGoogle = async () => {
 
 export const handleLogout = async () => {
     auth.signOut()
-        .then(() => persistor.purge()) //Purge persist state when logging out
+        .then(() => {
+            persistor.purge()//Purge persist state when logging out
+        })
 }

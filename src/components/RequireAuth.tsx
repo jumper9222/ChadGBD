@@ -1,10 +1,10 @@
-import { useContext } from "react";
-import { AuthContext } from "../features/auth/AuthContext";
 import { Navigate, Outlet } from "react-router-dom";
+import { auth } from "../firebase";
 
 export default function RequireAuth() {
-    const user = useContext(AuthContext).user
+    const currentUser = auth.currentUser;
+    console.log("require auth: ", currentUser)
 
-    if (!user) return <Navigate to={'/login'} />
+    if (!currentUser) return <Navigate to={'/login'} />
     else return <Outlet />
 }

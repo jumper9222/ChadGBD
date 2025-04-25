@@ -31,7 +31,7 @@ function ChatBox() {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
-    //ENER: Firestore ener for chatroom messages
+    //LISTENER: Firestore listener for chatroom messages
     useEffect(() => {
         const messageRef = collection(db, `chatrooms/${routePath}`, 'messages')
         const q = query(messageRef, orderBy("timestamp"))
@@ -65,17 +65,21 @@ function ChatBox() {
 
         //NEW CHATROOM: After prompting message, generate a title using initial prompt
         if (!routePath) {
-            dispatch(generateChatroomTitle({ prompt: input, chatroomId }))
-                .then((action) => { //After generating the title, upload to database
-                    console.log('chatroom title generated successfully')
-                    const { title, chatroomId } = action.payload as ChatroomTitleType;
-                    if (user) {
-                        console.log('uploading chatroom to db')
-                        const chatroomData = { chatroomId, title, uid: user?.uid }
-                        createChatroomInDb(chatroomData)
-                    }
-                })
-            navigate(`/chat/${chatroomId}`)
+            try {
+                console.log('Calling generate chatroom title', content, chatroomId)
+                const action = await dispatch(generateChatroomTitle({ prompt: input, chatroomId }))
+                //After generating the title, upload to database
+                console.log('chatroom title generated successfully')
+                const { title } = action.payload as ChatroomTitleType;
+                if (user) {
+                    console.log('uploading chatroom to db')
+                    const chatroomData = { chatroomId, title, uid: user?.uid }
+                    createChatroomInDb(chatroomData)
+                }
+                navigate(`/chat/${chatroomId}`)
+            } catch (error) {
+                console.error("There was an error generating title: ", error)
+            }
         }
 
         //EXISTING CHATROOM: Update content to array of chat history and set chatroomId to current chatroom id
@@ -85,10 +89,12 @@ function ChatBox() {
         }
 
         //Prompt message using model (either string or array)
-        dispatch(promptMessage({ content, chatroomId, prompt: input }))
-            .then(() => {
-                console.log('message prompted successfully', content, chatroomId, input)
-            })
+        try {
+            await dispatch(promptMessage({ content, chatroomId, prompt: input }))
+            console.log('message prompted successfully', content, chatroomId, input)
+        } catch (error) {
+            console.error("There was a problem generating the content: ", error)
+        }
 
         setInput('');
     }
@@ -113,7 +119,7 @@ function ChatBox() {
                     height: 'calc(100vh - 60px)',
                     width: '100%',
                     m: 0,
-                    justifyContent: messages.length > 0 ? "end" : "center",
+                    justifyContent: messages.length > 0 || loading ? "end" : "center",
                     alignItems: 'center',
                 }}
             >
@@ -150,7 +156,6 @@ function ChatBox() {
                     </Box>
                 </Box>
                 <Box sx={{
-
                     justifySelf: 'flex-end',
                     width: '70%',
                     maxWidth: '700px',
