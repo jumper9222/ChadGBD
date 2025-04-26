@@ -132,7 +132,7 @@ function ChatBox() {
                         alignItems: 'center',
                     }}
                 >
-                    <Box sx={{ width: '60%', display: 'flex', flexDirection: 'column', maxWidth: '700px', pt: 2 }}>
+                    <Box sx={{ width: { xs: '87%', lg: '60%' }, display: 'flex', flexDirection: 'column', maxWidth: '700px', pt: 2 }}>
                         {messages.length > 0 && (messages.map((msg, index) => (
                             <MessageBubble
                                 key={index}
@@ -155,9 +155,9 @@ function ChatBox() {
                         <div ref={bottomRef} />
                     </Box>
                 </Box>
+
                 <Box sx={{
-                    justifySelf: 'flex-end',
-                    width: '70%',
+                    width: { xs: '82%', md: '70%' },
                     maxWidth: '700px',
                 }}>
                     {messages.length === 0 &&
@@ -170,7 +170,7 @@ function ChatBox() {
                     sx={{
                         backgroundColor: '#f4f4f4',
                         borderRadius: '30px',
-                        width: '70%',
+                        width: { xs: '82%', lg: '70%' },
                         maxWidth: '700px',
                         pl: 2,
                         pr: 1,
