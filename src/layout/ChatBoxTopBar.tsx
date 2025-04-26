@@ -5,11 +5,15 @@ import { useNavigate } from "react-router-dom";
 import { handleLogout } from "../features/auth/authActions";
 import { useDispatch } from "react-redux";
 import { clearChatrooms } from "../features/chatrooms/chatroomsSlice";
+import { SidebarContext } from "../components/SidebarContext";
+import MenuIcon from '@mui/icons-material/Menu';
+import { flexRow } from "../styling/styling";
 
 function ChatBoxTopBar() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const { user } = useContext(AuthContext);
+    const { isSidebarOpen, toggleSidebar } = useContext(SidebarContext);
 
     const [openUserMenu, setOpenUserMenu] = useState<null | HTMLElement>(null)
     const open = Boolean(openUserMenu)
@@ -30,13 +34,16 @@ function ChatBoxTopBar() {
                 alignItems: 'center',
                 flex: 1,
                 height: '40px',
-                px: 3,
-                py: 1,
+                p: 1,
+                pl: isSidebarOpen ? 3 : 2,
                 backgroundColor: '#fff',
                 borderBottom: '1.5px solid rgb(234, 234, 234)'
             }}
         >
-            <Typography sx={{ fontWeight: 'bold', fontSize: '18px', color: '#5d5d5d' }}>ChadGBD</Typography>
+            <Box sx={{ ...flexRow, gap: 2, alignItems: 'center' }}>
+                {!isSidebarOpen && <IconButton onClick={toggleSidebar}><MenuIcon /></IconButton>}
+                <Typography sx={{ fontWeight: 'bold', fontSize: '18px', color: '#5d5d5d' }}>ChadGBD</Typography>
+            </Box>
             <Box
                 sx={{
                     display: "flex",
